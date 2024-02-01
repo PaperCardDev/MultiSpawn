@@ -55,16 +55,6 @@ class SpawnCommand extends TheMcCommand {
         this.teleport(player, spawnLocation, "世界出生点");
     }
 
-    private @NotNull String queryCoins(@NotNull Player player, @NotNull PlayerCoinsApi api) {
-        try {
-            final long c = api.queryCoins(player.getUniqueId());
-            return "%d".formatted(c);
-        } catch (Exception e) {
-            plugin.getSLF4JLogger().error("", e);
-            return "ERROR";
-        }
-    }
-
     private void teleport(@NotNull Player player, @NotNull Location location, @NotNull String name) {
         // 冷却
         final Long lastTp;
@@ -97,11 +87,20 @@ class SpawnCommand extends TheMcCommand {
         final PlayerCoinsApi api = plugin.getPlayerCoinsApi();
 
         plugin.getTaskScheduler().runTaskAsynchronously(() -> {
+
+
+            player.teleportAsync(location);
+
+            synchronized (this.lastTeleport) {
+                this.lastTeleport.put(player.getUniqueId(), cur);
+            }
+
             // todo: 先写死
             final long needCoins = 1;
+            final long leftCoins;
 
             try {
-                api.consumeCoins(player.getUniqueId(), needCoins);
+                leftCoins = api.consumeCoins(player.getUniqueId(), needCoins, "spawn传送到：" + name);
             } catch (NotEnoughCoinsException e) {
                 final TextComponent.Builder text = Component.text();
                 plugin.appendPrefix(text);
@@ -120,14 +119,6 @@ class SpawnCommand extends TheMcCommand {
                 return;
             }
 
-            player.teleportAsync(location);
-
-            synchronized (this.lastTeleport) {
-                this.lastTeleport.put(player.getUniqueId(), cur);
-            }
-
-            final String coins = this.queryCoins(player, api);
-
             final TextComponent.Builder text = Component.text();
             plugin.appendPrefix(text);
             text.appendSpace();
@@ -136,7 +127,7 @@ class SpawnCommand extends TheMcCommand {
             text.append(Component.text("枚硬币将你传送到").color(NamedTextColor.GREEN));
             text.append(Component.text(name).color(NamedTextColor.AQUA).decorate(TextDecoration.BOLD));
             text.append(Component.text("，你还有").color(NamedTextColor.GREEN));
-            text.append(plugin.coinsNumber(coins));
+            text.append(plugin.coinsNumber(leftCoins));
             text.append(Component.text("枚硬币~").color(NamedTextColor.GREEN));
             player.sendMessage(text.build());
         });

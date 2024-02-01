@@ -356,10 +356,6 @@ public final class MultiSpawn extends JavaPlugin implements Listener, MultiSpawn
         return Component.text(c).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD);
     }
 
-    @NotNull TextComponent coinsNumber(@NotNull String c) {
-        return Component.text(c).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD);
-    }
-
     @NotNull String minutesAndSeconds(long ms) {
         ms /= 1000L;
         final long minutes = ms / 60;
