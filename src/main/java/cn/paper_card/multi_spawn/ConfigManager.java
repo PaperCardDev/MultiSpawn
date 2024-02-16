@@ -69,4 +69,8 @@ class ConfigManager {
         this.plugin.saveConfig();
     }
 
+    void reload() {
+        this.plugin.reloadConfig();
+    }
+
 }

@@ -1,6 +1,9 @@
 package cn.paper_card.multi_spawn;
 
 import cn.paper_card.mc_command.TheMcCommand;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -26,6 +29,8 @@ class MultiSpawnCommand extends TheMcCommand.HasSub {
 
         this.addSubCommand(new Set());
         this.addSubCommand(new Remove());
+        this.addSubCommand(new Reload());
+        this.addSubCommand(new Config());
     }
 
     @Override
@@ -206,6 +211,91 @@ class MultiSpawnCommand extends TheMcCommand.HasSub {
 
                 return list;
             }
+            return null;
+        }
+    }
+
+    class Reload extends TheMcCommand {
+
+        private final @NotNull Permission permission;
+
+        protected Reload() {
+            super("reload");
+            this.permission = plugin.addPermission(MultiSpawnCommand.this.permission.getName() + "." + this.getLabel());
+        }
+
+        @Override
+        protected boolean canNotExecute(@NotNull CommandSender commandSender) {
+            return !commandSender.hasPermission(this.permission);
+        }
+
+        @Override
+        public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
+            plugin.getConfigManager().reload();
+            plugin.sendInfo(commandSender, "已重载配置");
+            return true;
+        }
+
+        @Override
+        public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
+            return null;
+        }
+    }
+
+    class Config extends TheMcCommand {
+
+        private final @NotNull Permission permission;
+
+        protected Config() {
+            super("config");
+            this.permission = plugin.addPermission(MultiSpawnCommand.this.permission.getName() + "." + this.getLabel());
+        }
+
+        @Override
+        protected boolean canNotExecute(@NotNull CommandSender commandSender) {
+            return !commandSender.hasPermission(this.permission);
+        }
+
+        @Override
+        public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
+            final TextComponent.Builder text = Component.text();
+            plugin.appendPrefix(text);
+            text.appendSpace();
+            text.append(Component.text("==== 配置信息 ===="));
+
+            final ConfigManager cm = plugin.getConfigManager();
+
+            // 冷却
+            text.appendNewline();
+            text.append(Component.text("传送冷却："));
+            text.append(Component.text(plugin.minutesAndSeconds(cm.getCoolDown())));
+
+            // 硬币
+            text.appendNewline();
+            text.append(Component.text("硬币花费，传送到自定义传送点："));
+            text.append(Component.text(cm.getCoinsSpawnCustom()));
+
+            // 硬币
+            text.appendNewline();
+            text.append(Component.text("硬币花费，传送到床："));
+            text.append(Component.text(cm.getCoinsSpawnBed()));
+
+            // 硬币
+            text.appendNewline();
+            text.append(Component.text("硬币花费，传送到世界出生点："));
+            text.append(Component.text(cm.getCoinsSpawnWorld()));
+
+            // 硬币
+            text.appendNewline();
+            text.append(Component.text("硬币花费，传送到上次死亡位置："));
+            text.append(Component.text(cm.getCoinsSpawnDeath()));
+
+            commandSender.sendMessage(text.build().color(NamedTextColor.GREEN));
+            return true;
+        }
+
+        @Override
+        public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
             return null;
         }
     }
