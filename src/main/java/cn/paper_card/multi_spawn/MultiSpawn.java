@@ -36,8 +36,11 @@ public final class MultiSpawn extends JavaPlugin implements Listener, MultiSpawn
 
     private final boolean enable = false;
 
+    private final @NotNull ConfigManager configManager;
+
     public MultiSpawn() {
         this.taskScheduler = UniversalScheduler.getScheduler(this);
+        this.configManager = new ConfigManager(this);
     }
 
     @NotNull TaskScheduler getTaskScheduler() {
@@ -71,7 +74,11 @@ public final class MultiSpawn extends JavaPlugin implements Listener, MultiSpawn
         assert command1 != null;
         command1.setTabCompleter(multiSpawnCommand);
         command1.setExecutor(multiSpawnCommand);
+
+        this.configManager.setDefaults();
+        this.configManager.save();
     }
+
 
     @EventHandler
     public void onSetSpawn(@NotNull PlayerSetSpawnEvent event) {
@@ -293,6 +300,8 @@ public final class MultiSpawn extends JavaPlugin implements Listener, MultiSpawn
             getSLF4JLogger().error("", e);
         }
         this.taskScheduler.cancelTasks(this);
+
+        this.configManager.save();
     }
 
     @Override
@@ -352,6 +361,10 @@ public final class MultiSpawn extends JavaPlugin implements Listener, MultiSpawn
         return this.playerCoinsApi;
     }
 
+    @NotNull ConfigManager getConfigManager() {
+        return this.configManager;
+    }
+
     @NotNull TextComponent coinsNumber(long c) {
         return Component.text(c).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD);
     }
@@ -375,4 +388,5 @@ public final class MultiSpawn extends JavaPlugin implements Listener, MultiSpawn
 
         return sb.toString();
     }
+
 }

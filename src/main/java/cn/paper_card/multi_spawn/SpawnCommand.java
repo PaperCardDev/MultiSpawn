@@ -48,13 +48,13 @@ class SpawnCommand extends TheMcCommand {
             plugin.sendError(player, "你还没有设置床");
             return;
         }
-        this.teleport(player, bedSpawnLocation, "你的床");
+        this.teleport(player, bedSpawnLocation, "你的床", plugin.getConfigManager().getCoinsSpawnBed());
     }
 
     private void onWorld(@NotNull Player player) {
         final World world = player.getWorld();
         final Location spawnLocation = world.getSpawnLocation();
-        this.teleport(player, spawnLocation, "世界出生点");
+        this.teleport(player, spawnLocation, "世界出生点", plugin.getConfigManager().getCoinsSpawnWorld());
     }
 
     private void onDeath(@NotNull Player player) {
@@ -63,10 +63,10 @@ class SpawnCommand extends TheMcCommand {
             plugin.sendError(player, "你没有上次死亡位置");
             return;
         }
-        this.teleport(player, spawnLocation, "上次死亡位置");
+        this.teleport(player, spawnLocation, "上次死亡位置", plugin.getConfigManager().getCoinsSpawnDeath());
     }
 
-    private void teleport(@NotNull Player player, @NotNull Location location, @NotNull String name) {
+    private void teleport(@NotNull Player player, @NotNull Location location, @NotNull String name, long coins) {
         // 冷却
         final Long lastTp;
         synchronized (this.lastTeleport) {
@@ -75,8 +75,7 @@ class SpawnCommand extends TheMcCommand {
 
         final long cur = System.currentTimeMillis();
 
-        // todo: 先写死
-        final long coolDown = 60 * 1000L;
+        final long coolDown = plugin.getConfigManager().getCoolDown();
 
         if (lastTp != null) {
             final long delta = lastTp - cur + coolDown;
@@ -105,18 +104,16 @@ class SpawnCommand extends TheMcCommand {
                 this.lastTeleport.put(player.getUniqueId(), cur);
             }
 
-            // todo: 先写死
-            final long needCoins = 1;
             final long leftCoins;
 
             try {
-                leftCoins = api.consumeCoins(player.getUniqueId(), needCoins, "spawn传送到：" + name);
+                leftCoins = api.consumeCoins(player.getUniqueId(), coins, "spawn传送到：" + name);
             } catch (NotEnoughCoinsException e) {
                 final TextComponent.Builder text = Component.text();
                 plugin.appendPrefix(text);
                 text.appendSpace();
                 text.append(Component.text("你没有足够的硬币来进行传送，需要").color(NamedTextColor.RED));
-                text.append(plugin.coinsNumber(needCoins));
+                text.append(plugin.coinsNumber(coins));
                 text.append(Component.text("枚硬币，你只有").color(NamedTextColor.RED));
                 text.append(plugin.coinsNumber(e.getLeftCoins()));
                 text.append(Component.text("枚硬币").color(NamedTextColor.RED));
@@ -133,7 +130,7 @@ class SpawnCommand extends TheMcCommand {
             plugin.appendPrefix(text);
             text.appendSpace();
             text.append(Component.text("已花费").color(NamedTextColor.GREEN));
-            text.append(plugin.coinsNumber(needCoins));
+            text.append(plugin.coinsNumber(coins));
             text.append(Component.text("枚硬币将你传送到").color(NamedTextColor.GREEN));
             text.append(Component.text(name).color(NamedTextColor.AQUA).decorate(TextDecoration.BOLD));
             text.append(Component.text("，你还有").color(NamedTextColor.GREEN));
@@ -200,7 +197,7 @@ class SpawnCommand extends TheMcCommand {
             final Location location = new Location(world, info.x(), info.y(), info.z());
 
             // 直接传送
-            this.teleport(player, location, info.name());
+            this.teleport(player, location, info.name(), plugin.getConfigManager().getCoinsSpawnCustom());
         });
 
 
