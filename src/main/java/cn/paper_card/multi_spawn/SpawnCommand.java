@@ -26,6 +26,8 @@ class SpawnCommand extends TheMcCommand {
     private final static String NAME_BED = "bed";
     private final static String NAME_WORLD = "world";
 
+    private final static String NAME_DEATH = "death";
+
     private final @NotNull HashMap<UUID, Long> lastTeleport;
 
     protected SpawnCommand(@NotNull MultiSpawn plugin) {
@@ -53,6 +55,15 @@ class SpawnCommand extends TheMcCommand {
         final World world = player.getWorld();
         final Location spawnLocation = world.getSpawnLocation();
         this.teleport(player, spawnLocation, "世界出生点");
+    }
+
+    private void onDeath(@NotNull Player player) {
+        final Location spawnLocation = player.getLastDeathLocation();
+        if (spawnLocation == null) {
+            plugin.sendError(player, "你没有上次死亡位置");
+            return;
+        }
+        this.teleport(player, spawnLocation, "上次死亡位置");
     }
 
     private void teleport(@NotNull Player player, @NotNull Location location, @NotNull String name) {
@@ -87,7 +98,6 @@ class SpawnCommand extends TheMcCommand {
         final PlayerCoinsApi api = plugin.getPlayerCoinsApi();
 
         plugin.getTaskScheduler().runTaskAsynchronously(() -> {
-
 
             player.teleportAsync(location);
 
@@ -150,13 +160,17 @@ class SpawnCommand extends TheMcCommand {
         }
 
         if (NAME_BED.equals(argSpawnName)) {
-
             this.onBed(player);
             return true;
         }
 
         if (NAME_WORLD.equals(argSpawnName)) {
             this.onWorld(player);
+            return true;
+        }
+
+        if (NAME_DEATH.equals(argSpawnName)) {
+            this.onDeath(player);
             return true;
         }
 
@@ -203,6 +217,7 @@ class SpawnCommand extends TheMcCommand {
 
             list.add(NAME_BED);
             list.add(NAME_WORLD);
+            list.add(NAME_DEATH);
 
             try {
                 names = plugin.getSpawnLocationListService().queryAllNames();
