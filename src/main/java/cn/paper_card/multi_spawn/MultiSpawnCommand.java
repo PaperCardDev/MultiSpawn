@@ -270,24 +270,24 @@ class MultiSpawnCommand extends TheMcCommand.HasSub {
             text.append(Component.text("传送冷却："));
             text.append(Component.text(plugin.minutesAndSeconds(cm.getCoolDown())));
 
-            // 硬币
+            //
             text.appendNewline();
-            text.append(Component.text("硬币花费，传送到自定义传送点："));
+            text.append(Component.text("Coins花费，传送到自定义传送点："));
             text.append(Component.text(cm.getCoinsSpawnCustom()));
 
-            // 硬币
+            //
             text.appendNewline();
-            text.append(Component.text("硬币花费，传送到床："));
+            text.append(Component.text("Coins花费，传送到床："));
             text.append(Component.text(cm.getCoinsSpawnBed()));
 
-            // 硬币
+            //
             text.appendNewline();
-            text.append(Component.text("硬币花费，传送到世界出生点："));
+            text.append(Component.text("Coins花费，传送到世界出生点："));
             text.append(Component.text(cm.getCoinsSpawnWorld()));
 
-            // 硬币
+            //
             text.appendNewline();
-            text.append(Component.text("硬币花费，传送到上次死亡位置："));
+            text.append(Component.text("Coins花费，传送到上次死亡位置："));
             text.append(Component.text(cm.getCoinsSpawnDeath()));
 
             commandSender.sendMessage(text.build().color(NamedTextColor.GREEN));

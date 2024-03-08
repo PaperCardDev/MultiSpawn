@@ -280,11 +280,21 @@ public final class MultiSpawn extends JavaPlugin implements Listener, MultiSpawn
             }
 
             player.getScheduler().run(this, task1 -> {
+
                 player.teleportAsync(location);
+
                 player.sendTitlePart(TitlePart.TITLE, Component.text()
                         .append(Component.text("出生在").color(NamedTextColor.GREEN))
                         .append(Component.text(info.name()).color(NamedTextColor.GOLD).decorate(TextDecoration.BOLD))
                         .build());
+
+                getServer().broadcast(Component.text()
+                        .append(player.displayName())
+                        .appendSpace()
+                        .append(Component.text("出生在了"))
+                        .append(Component.text(info.name()).color(NamedTextColor.DARK_RED).decorate(TextDecoration.BOLD))
+                        .append(Component.text("~"))
+                        .build().color(NamedTextColor.AQUA));
 
                 player.setBedSpawnLocation(location, true);
             }, () -> {
